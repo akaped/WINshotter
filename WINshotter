@@ -74,6 +74,7 @@ $timestamp = Get-Date -Format o | ForEach-Object { $_ -replace ":", "." }
 
 # Save to file
 $bitmap.Save($File)
+### $file.Save($_.Directory.FullName +”\”+ $_.BaseName+”.jpg”,”jpeg”); I would like to save it in JPG. 
 Write-Output "Screenshot saved to:"
 Write-Output $File
 
