@@ -16,7 +16,7 @@ The usage is really sample.
 
 
 ! You obviously need to have a FTP server up and running !
-PAY ATTENTION. THis script uses an encrypted protocol to transfer the data, this means that a MITM attack will spoof easily your USR and PSW or the content you are transferring to the server. 
+PAY ATTENTION. THis script DOES NOT USE an encrypted protocol to transfer the data, this means that a MITM attack will spoof easily your USR and PSW or the content you are transferring to the server. 
 Soon I will release a new implementation that includes the option to use FTPS. 
 
 I needed this script to run when windows booted and the user logged in. So I've packed it into an exe with PS2EXE and added the activity to the Windows Tasker utility. 
