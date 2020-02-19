@@ -29,6 +29,8 @@ $ftp.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
 $ftp.Credentials = new-object System.Net.NetworkCredential("anonymous","anonymous@localhost")
 $ftp.UseBinary = $true
 $ftp.UsePassive = $false # enable / disable passive mode
+$ftp.EnableSsl=$true
+$ftp.KeepAlive=$true
 # read in the file to upload as a byte array
 $content = [System.IO.File]::ReadAllBytes($File)
 $ftp.ContentLength = $content.Length
